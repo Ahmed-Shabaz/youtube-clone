@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ViewTube</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #212121;
+      --surface2: #272727;
+      --border: #303030;
+      --text: #f1f1f1;
+      --text-muted: #aaaaaa;
+      --red: #ff0000;
+      --red-dark: #cc0000;
+      --accent: #3ea6ff;
+      --sidebar-w: 240px;
+      --header-h: 56px;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--header-h);
+      background: var(--bg);
+      display: flex; align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; min-width: var(--sidebar-w); }
+
+    .menu-btn {
+      background: none; border: none; color: var(--text);
+      width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+      font-size: 18px; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .menu-btn:hover { background: var(--surface2); }
+
+    .logo { display: flex; align-items: center; gap: 4px; text-decoration: none; color: var(--text); }
+    .logo-icon { color: var(--red); font-size: 28px; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+
+    .header-center { flex: 1; display: flex; align-items: center; gap: 8px; max-width: 720px; margin: 0 auto; }
+
+    .search-wrap { flex: 1; display: flex; }
+    .search-input {
+      flex: 1; height: 40px;
+      background: #121212; border: 1px solid var(--border);
+      border-right: none; border-radius: 20px 0 0 20px;
+      color: var(--text); font-size: 16px; padding: 0 16px;
+      outline: none; transition: border-color .2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-btn {
+      width: 64px; height: 40px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0 20px 20px 0; color: var(--text);
+      font-size: 16px; cursor: pointer; transition: background .15s;
+    }
+    .search-btn:hover { background: #3d3d3d; }
+    .mic-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--surface2); border: none; color: var(--text);
+      font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .mic-btn:hover { background: #3d3d3d; }
+
+    .header-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: none; border: none; color: var(--text);
+      font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .icon-btn:hover { background: var(--surface2); }
+
+    .sign-in-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--accent); background: none;
+      color: var(--accent); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: background .15s;
+    }
+    .sign-in-btn:hover { background: rgba(62,166,255,.1); }
+
+    /* ── SIDEBAR ── */
+    aside {
+      position: fixed; top: var(--header-h); left: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--bg);
+      overflow-y: auto;
+      padding: 12px 0;
+      scrollbar-width: none;
+      transition: transform .25s ease;
+      z-index: 90;
+    }
+    aside::-webkit-scrollbar { display: none; }
+    aside.collapsed { transform: translateX(-100%); }
+
+    .sidebar-section { padding: 0 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+    .sidebar-section:last-child { border-bottom: none; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 20px;
+      padding: 0 12px; height: 40px; border-radius: 10px;
+      margin: 0 6px; cursor: pointer;
+      color: var(--text); font-size: 14px; font-weight: 400;
+      transition: background .15s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: var(--surface2); }
+    .nav-item.active { background: var(--surface2); font-weight: 500; }
+    .nav-item i { width: 24px; text-align: center; font-size: 20px; }
+
+    .sidebar-label {
+      padding: 16px 18px 8px;
+      font-size: 15px; font-weight: 700; color: var(--text);
+    }
+
+    .channel-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 12px; height: 40px; border-radius: 10px;
+      margin: 0 6px; cursor: pointer; font-size: 14px;
+      transition: background .15s;
+    }
+    .channel-item:hover { background: var(--surface2); }
+    .channel-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ── MAIN ── */
+    main {
+      margin-top: var(--header-h);
+      margin-left: var(--sidebar-w);
+      padding: 24px 24px 40px;
+      transition: margin-left .25s ease;
+    }
+    main.full { margin-left: 0; }
+
+    /* ── CHIPS ── */
+    .chips {
+      display: flex; gap: 12px; overflow-x: auto;
+      margin-bottom: 24px; padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex-shrink: 0; padding: 6px 14px; border-radius: 8px;
+      background: var(--surface); border: none; color: var(--text);
+      font-size: 14px; cursor: pointer; transition: background .15s;
+      white-space: nowrap;
+    }
+    .chip:hover { background: #3d3d3d; }
+    .chip.active { background: var(--text); color: var(--bg); }
+
+    /* ── VIDEO GRID ── */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .video-card { cursor: pointer; }
+    .video-card:hover .thumb img { transform: scale(1.03); }
+
+    .thumb {
+      position: relative; width: 100%;
+      padding-top: 56.25%; border-radius: 12px;
+      overflow: hidden; background: var(--surface);
+      margin-bottom: 12px;
+    }
+    .thumb img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; transition: transform .3s ease;
+    }
+    .duration {
+      position: absolute; bottom: 8px; right: 8px;
+      background: rgba(0,0,0,.85); color: #fff;
+      font-size: 12px; font-weight: 500; padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .progress-bar {
+      position: absolute; bottom: 0; left: 0;
+      height: 3px; background: var(--red);
+    }
+
+    .card-meta { display: flex; gap: 12px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+    }
+    .card-info { flex: 1; min-width: 0; }
+    .card-title {
+      font-size: 14px; font-weight: 500; line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; margin-bottom: 4px;
+    }
+    .card-channel { font-size: 13px; color: var(--text-muted); margin-bottom: 2px; }
+    .card-stats { font-size: 13px; color: var(--text-muted); }
+
+    /* ── VIDEO PLAYER PAGE ── */
+    #player-page {
+      display: none;
+    }
+    #player-page.open {
+      display: block;
+    }
+    #home-page.hidden {
+      display: none;
+    }
+
+    .player-layout { display: flex; gap: 24px; }
+    .player-main { flex: 1; min-width: 0; }
+    .player-sidebar { width: 400px; flex-shrink: 0; }
+
+    .video-player-wrap {
+      position: relative; width: 100%;
+      padding-top: 56.25%;
+      background: #000; border-radius: 12px; overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .video-player-wrap iframe,
+    .video-player-wrap .fake-player {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+    }
+    .fake-player {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: #111; cursor: pointer;
+    }
+    .fake-player img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .play-overlay {
+      position: relative; z-index: 2;
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(0,0,0,.7); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 32px; color: #fff;
+      transition: transform .2s, background .2s;
+    }
+    .fake-player:hover .play-overlay { transform: scale(1.1); background: var(--red); }
+
+    .player-controls {
+      background: #111; padding: 8px 16px; border-radius: 0 0 12px 12px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    .progress {
+      width: 100%; height: 4px; border-radius: 2px;
+      background: var(--border); cursor: pointer; position: relative;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 2px; background: var(--red);
+      width: 30%; position: relative; pointer-events: none;
+    }
+    .progress-fill::after {
+      content: ''; position: absolute; right: -6px; top: -4px;
+      width: 12px; height: 12px; border-radius: 50%; background: var(--red);
+    }
+
+    .ctrl-row { display: flex; align-items: center; gap: 8px; }
+    .ctrl-btn {
+      background: none; border: none; color: var(--text);
+      width: 36px; height: 36px; border-radius: 50%;
+      font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .ctrl-btn:hover { background: var(--surface2); }
+    .time-display { font-size: 13px; color: var(--text-muted); margin-right: auto; }
+    .volume-wrap { display: flex; align-items: center; gap: 6px; }
+    .volume-slider {
+      width: 80px; appearance: none; height: 4px;
+      border-radius: 2px; background: var(--border); cursor: pointer;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      appearance: none; width: 12px; height: 12px;
+      border-radius: 50%; background: var(--text);
+    }
+
+    .video-title-big { font-size: 20px; font-weight: 700; margin-bottom: 12px; line-height: 1.3; }
+
+    .video-meta-row {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 12px; margin-bottom: 16px;
+    }
+    .view-count { font-size: 14px; color: var(--text-muted); }
+
+    .action-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .action-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 20px;
+      background: var(--surface2); border: none; color: var(--text);
+      font-size: 14px; cursor: pointer; transition: background .15s;
+    }
+    .action-btn:hover { background: #3d3d3d; }
+    .action-btn.like-active { background: var(--surface); }
+    .like-divider { width: 1px; height: 24px; background: var(--border); }
+
+    .channel-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 0; border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); margin-bottom: 16px;
+    }
+    .channel-row-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px;
+    }
+    .channel-row-info { flex: 1; }
+    .channel-row-name { font-size: 15px; font-weight: 500; }
+    .channel-row-subs { font-size: 13px; color: var(--text-muted); }
+    .subscribe-btn {
+      padding: 8px 16px; border-radius: 20px;
+      background: var(--text); border: none;
+      color: var(--bg); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: background .15s;
+    }
+    .subscribe-btn:hover { background: #d0d0d0; }
+    .subscribe-btn.subscribed { background: var(--surface2); color: var(--text); }
+
+    .description-box {
+      background: var(--surface2); border-radius: 12px;
+      padding: 14px; margin-bottom: 16px;
+      font-size: 14px; line-height: 1.6; cursor: pointer;
+    }
+    .description-box.collapsed { max-height: 80px; overflow: hidden; position: relative; }
+    .description-box.collapsed::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 40px;
+      background: linear-gradient(transparent, var(--surface2));
+    }
+
+    /* comments */
+    .comments-section { padding-top: 16px; }
+    .comments-header { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
+    .comment-input-row { display: flex; gap: 12px; margin-bottom: 24px; }
+    .comment-input {
+      flex: 1; background: none; border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text); font-size: 14px; padding: 8px 0;
+      outline: none; font-family: inherit;
+      transition: border-color .2s;
+    }
+    .comment-input:focus { border-color: var(--accent); }
+    .comment { display: flex; gap: 12px; margin-bottom: 20px; }
+    .comment-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+    }
+    .comment-body { flex: 1; }
+    .comment-author { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+    .comment-author span { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-left: 8px; }
+    .comment-text { font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
+    .comment-actions { display: flex; align-items: center; gap: 16px; }
+    .comment-action-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 13px; cursor: pointer; display: flex;
+      align-items: center; gap: 4px; transition: color .15s;
+    }
+    .comment-action-btn:hover { color: var(--text); }
+
+    /* related videos sidebar */
+    .related-video {
+      display: flex; gap: 8px; cursor: pointer;
+      margin-bottom: 12px; border-radius: 8px;
+      padding: 4px; transition: background .15s;
+    }
+    .related-video:hover { background: var(--surface2); }
+    .related-thumb {
+      position: relative; width: 168px; flex-shrink: 0;
+      border-radius: 8px; overflow: hidden;
+      background: var(--surface);
+    }
+    .related-thumb img { width: 100%; height: 94px; object-fit: cover; display: block; }
+    .related-duration {
+      position: absolute; bottom: 4px; right: 4px;
+      background: rgba(0,0,0,.85); color: #fff;
+      font-size: 11px; padding: 1px 4px; border-radius: 3px;
+    }
+    .related-info { flex: 1; min-width: 0; }
+    .related-title {
+      font-size: 13px; font-weight: 500; line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px;
+    }
+    .related-channel { font-size: 12px; color: var(--text-muted); }
+    .related-stats { font-size: 12px; color: var(--text-muted); }
+
+    /* back btn */
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; color: var(--text);
+      font-size: 14px; cursor: pointer; margin-bottom: 16px;
+      padding: 6px 12px; border-radius: 8px; transition: background .15s;
+    }
+    .back-btn:hover { background: var(--surface2); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    /* responsive */
+    @media (max-width: 1200px) {
+      .player-sidebar { width: 340px; }
+    }
+    @media (max-width: 900px) {
+      .player-layout { flex-direction: column; }
+      .player-sidebar { width: 100%; }
+    }
+    @media (max-width: 600px) {
+      aside { display: none; }
+      main { margin-left: 0; padding: 16px; }
+      .header-left { min-width: auto; }
+      .logo-text { display: none; }
+      .video-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+    <a class="logo" href="#" id="logoLink">
+      <i class="fab fa-youtube logo-icon"></i>
+      <span class="logo-text">ViewTube</span>
+    </a>
+  </div>
+  <div class="header-center">
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Search" id="searchInput"/>
+      <button class="search-btn" id="searchBtn"><i class="fas fa-search"></i></button>
+    </div>
+    <button class="mic-btn"><i class="fas fa-microphone"></i></button>
+  </div>
+  <div class="header-right">
+    <button class="icon-btn"><i class="fas fa-video"></i></button>
+    <button class="icon-btn"><i class="fas fa-bell"></i></button>
+    <button class="sign-in-btn"><i class="far fa-user-circle" style="font-size:18px"></i> Sign in</button>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-section">
+    <a class="nav-item active" href="#" data-page="home">
+      <i class="fas fa-home"></i> Home
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-fire"></i> Trending
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-shopping-bag"></i> Shopping
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-music"></i> Music
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-film"></i> Movies
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-gamepad"></i> Gaming
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-newspaper"></i> News
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-trophy"></i> Sports
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <a class="nav-item" href="#">
+      <i class="fas fa-user-circle"></i> You
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-history"></i> History
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-play-circle"></i> Playlists
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-clock"></i> Watch later
+    </a>
+    <a class="nav-item" href="#">
+      <i class="fas fa-thumbs-up"></i> Liked videos
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Subscriptions</div>
+    <div class="channel-item">
+      <div class="channel-avatar" style="background:#ff6b6b;color:#fff">T</div> TechBurst
+    </div>
+    <div class="channel-item">
+      <div class="channel-avatar" style="background:#4ecdc4;color:#fff">M</div> MusicWave
+    </div>
+    <div class="channel-item">
+      <div class="channel-avatar" style="background:#45b7d1;color:#fff">G</div> GamersHub
+    </div>
+    <div class="channel-item">
+      <div class="channel-avatar" style="background:#f9ca24;color:#000">C</div> CookingPro
+    </div>
+    <div class="channel-item">
+      <div class="channel-avatar" style="background:#6c5ce7;color:#fff">S</div> ScienceNow
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <a class="nav-item" href="#"><i class="fas fa-cog"></i> Settings</a>
+    <a class="nav-item" href="#"><i class="fas fa-flag"></i> Report history</a>
+    <a class="nav-item" href="#"><i class="fas fa-question-circle"></i> Help</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main id="mainContent">
+  <!-- HOME PAGE -->
+  <div id="home-page">
+    <div class="chips" id="chips">
+      <button class="chip active">All</button>
+      <button class="chip">Gaming</button>
+      <button class="chip">Music</button>
+      <button class="chip">Live</button>
+      <button class="chip">React.js</button>
+      <button class="chip">JavaScript</button>
+      <button class="chip">Python</button>
+      <button class="chip">Cooking</button>
+      <button class="chip">Vlogs</button>
+      <button class="chip">Fitness</button>
+      <button class="chip">Travel</button>
+      <button class="chip">Science</button>
+      <button class="chip">Comedy</button>
+      <button class="chip">News</button>
+    </div>
+    <div class="video-grid" id="videoGrid"></div>
+  </div>
+
+  <!-- PLAYER PAGE -->
+  <div id="player-page">
+    <button class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i> Back</button>
+    <div class="player-layout">
+      <div class="player-main">
+        <div class="video-player-wrap">
+          <div class="fake-player" id="fakePlayer">
+            <img id="playerThumb" src="" alt=""/>
+            <div class="play-overlay" id="playBtn"><i class="fas fa-play"></i></div>
+          </div>
+        </div>
+        <h1 class="video-title-big" id="playerTitle"></h1>
+        <div class="video-meta-row">
+          <span class="view-count" id="playerViews"></span>
+          <div class="action-btns">
+            <button class="action-btn" id="likeBtn">
+              <i class="fas fa-thumbs-up"></i> <span id="likeCount">0</span>
+            </button>
+            <div class="like-divider"></div>
+            <button class="action-btn" id="dislikeBtn">
+              <i class="fas fa-thumbs-down"></i>
+            </button>
+            <button class="action-btn"><i class="fas fa-share"></i> Share</button>
+            <button class="action-btn"><i class="fas fa-download"></i> Download</button>
+            <button class="action-btn"><i class="fas fa-ellipsis-h"></i></button>
+          </div>
+        </div>
+        <div class="channel-row">
+          <div class="channel-row-avatar" id="playerAvatar"></div>
+          <div class="channel-row-info">
+            <div class="channel-row-name" id="playerChannel"></div>
+            <div class="channel-row-subs" id="playerSubs"></div>
+          </div>
+          <button class="subscribe-btn" id="subscribeBtn">Subscribe</button>
+        </div>
+        <div class="description-box collapsed" id="descBox">
+          <div id="descText"></div>
+        </div>
+        <div class="comments-section">
+          <div class="comments-header" id="commentsHeader"></div>
+          <div class="comment-input-row">
+            <div class="avatar" style="background:#3ea6ff;color:#fff;width:36px;height:36px;flex-shrink:0;font-size:14px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center">Y</div>
+            <input class="comment-input" placeholder="Add a comment..." id="commentInput"/>
+          </div>
+          <div id="commentsList"></div>
+        </div>
+      </div>
+      <div class="player-sidebar" id="relatedList"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ── DATA ──────────────────────────────────────────────────────────────────
+  const COLORS = ['#ff6b6b','#4ecdc4','#45b7d1','#f9ca24','#6c5ce7','#fd79a8','#00b894','#e17055','#0984e3','#6d214f','#b33771','#1e3799'];
+  const CHANNELS = [
+    {name:'TechBurst',subs:'2.4M subscribers',color:'#ff6b6b'},
+    {name:'MusicWave',subs:'1.1M subscribers',color:'#4ecdc4'},
+    {name:'GamersHub',subs:'3.8M subscribers',color:'#45b7d1'},
+    {name:'CookingPro',subs:'890K subscribers',color:'#f9ca24'},
+    {name:'ScienceNow',subs:'5.2M subscribers',color:'#6c5ce7'},
+    {name:'TravelVibes',subs:'720K subscribers',color:'#fd79a8'},
+    {name:'FitLife',subs:'1.5M subscribers',color:'#00b894'},
+    {name:'ComedyCentral',subs:'4.1M subscribers',color:'#e17055'},
+  ];
+  const VIDEOS = [
+    {id:1,title:'Building a Full-Stack App with React & Node.js in 2025',channel:0,views:'1.2M views',ago:'3 days ago',duration:'45:23',thumb:'https://picsum.photos/seed/v1/640/360',progress:30,likes:48200,comments:['Amazing tutorial! I followed along and built my whole portfolio.','This is exactly what I needed. The section on auth was gold.','Best React tutorial on the platform hands down.','Could you do a follow-up on deployment?']},
+    {id:2,title:'Top 10 Music Hits of the Year — Full Compilation',channel:1,views:'4.5M views',ago:'1 week ago',duration:'1:02:10',thumb:'https://picsum.photos/seed/v2/640/360',progress:0,likes:120000,comments:['This playlist got me through my whole work week!','Track 7 is an absolute banger, wow.','Finally a compilation without any skips.']},
+    {id:3,title:'I Played This Game for 100 Hours — Honest Review',channel:2,views:'892K views',ago:'5 days ago',duration:'28:44',thumb:'https://picsum.photos/seed/v3/640/360',progress:60,likes:34500,comments:['The combat system analysis at 14:00 is spot on.','Agreed with every single point here.','Still waiting for the DLC review!']},
+    {id:4,title:'Perfect Pasta Carbonara From Scratch — No Cream!',channel:3,views:'3.1M views',ago:'2 weeks ago',duration:'12:37',thumb:'https://picsum.photos/seed/v4/640/360',progress:80,likes:95000,comments:['Made this last night and my family loved it!','The egg technique changed my life.','Finally cracked carbonara thanks to this.']},
+    {id:5,title:'The James Webb Telescope Just Changed Everything We Know',channel:4,views:'7.8M views',ago:'1 month ago',duration:'22:15',thumb:'https://picsum.photos/seed/v5/640/360',progress:0,likes:310000,comments:['Mind absolutely blown. The universe is insane.','This deserves a Nobel Prize for science communication.','Shared with my whole family.']},
+    {id:6,title:'Solo Travel in Japan for 30 Days — Complete Guide',channel:5,views:'2.2M views',ago:'3 weeks ago',duration:'35:50',thumb:'https://picsum.photos/seed/v6/640/360',progress:15,likes:76000,comments:['Booked my flight after watching this!','The Kyoto section is perfection.','What camera are you using? Everything looks stunning.']},
+    {id:7,title:'30-Day Transformation: What Actually Worked',channel:6,views:'1.8M views',ago:'2 weeks ago',duration:'18:22',thumb:'https://picsum.photos/seed/v7/640/360',progress:0,likes:62000,comments:['Started my own 30-day challenge inspired by this.','Super honest and realistic. No BS.','Down 8kg so far following your advice!']},
+    {id:8,title:'Stand-Up Special: Nothing Makes Sense Anymore',channel:7,views:'6.3M views',ago:'4 days ago',duration:'58:47',thumb:'https://picsum.photos/seed/v8/640/360',progress:45,likes:220000,comments:['I was crying laughing the entire time.','The airline bit is pure genius.','Watched this three times already.']},
+    {id:9,title:'Python Automation That Saves Me 10 Hours a Week',channel:0,views:'980K views',ago:'6 days ago',duration:'24:13',thumb:'https://picsum.photos/seed/v9/640/360',progress:0,likes:42000,comments:['The web scraping section alone was worth it.','I automated my reporting workflow using your script!','Clean code, clean explanation.']},
+    {id:10,title:'New Album Listening Session — React & Discussion',channel:1,views:'550K views',ago:'8 hours ago',duration:'1:14:30',thumb:'https://picsum.photos/seed/v10/640/360',progress:0,likes:28000,comments:['Track 3 is a masterpiece, no debate.','Best listening session I have ever seen on here.','Came for the music, stayed for the commentary.']},
+    {id:11,title:'Every Zelda Game Ranked — Definitive Tier List',channel:2,views:'2.6M views',ago:'2 months ago',duration:'41:05',thumb:'https://picsum.photos/seed/v11/640/360',progress:70,likes:89000,comments:['Putting OoT at the top is the only correct answer.','Finally a ranking I agree with 90% of.','I had to pause and cool down at the BOTW take lol.']},
+    {id:12,title:'10 Budget Recipes That Taste Like a Restaurant',channel:3,views:'4.4M views',ago:'1 month ago',duration:'20:44',thumb:'https://picsum.photos/seed/v12/640/360',progress:0,likes:140000,comments:['Recipe 4 is on rotation in my house now.','Under €2 per serving — actually insane.','You saved my wallet AND my taste buds.']},
+  ];
+  const COMMENTS_DATA = [
+    {author:'TechFan99',ago:'2 days ago',text:'Absolutely love the depth here. This is why I keep coming back to this channel!',likes:342},
+    {author:'CasualViewer',ago:'1 day ago',text:'Watched this during lunch and now I am three hours down the rabbit hole. Worth it.',likes:128},
+    {author:'QuietObserver',ago:'5 hours ago',text:'The editing on this is next level. Every frame is intentional.',likes:67},
+    {author:'NightOwl404',ago:'3 hours ago',text:'I showed this to my professor and she added it to the course syllabus 😂',likes:211},
+    {author:'CreativeType',ago:'58 minutes ago',text:'Honestly one of the best pieces of content I have seen in years.',likes:44},
+  ];
+
+  // ── RENDER HOME ───────────────────────────────────────────────────────────
+  function renderHome(videos) {
+    const grid = document.getElementById('videoGrid');
+    grid.innerHTML = videos.map(v => {
+      const ch = CHANNELS[v.channel];
+      return `
+        <div class="video-card" onclick="openVideo(${v.id})">
+          <div class="thumb">
+            <img src="${v.thumb}" alt="${v.title}" loading="lazy"/>
+            <span class="duration">${v.duration}</span>
+            ${v.progress ? `<div class="progress-bar" style="width:${v.progress}%"></div>` : ''}
+          </div>
+          <div class="card-meta">
+            <div class="avatar" style="background:${ch.color};color:${ch.color==='#f9ca24'?'#000':'#fff'}">${ch.name[0]}</div>
+            <div class="card-info">
+              <div class="card-title">${v.title}</div>
+              <div class="card-channel">${ch.name}</div>
+              <div class="card-stats">${v.views} • ${v.ago}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  renderHome(VIDEOS);
+
+  // ── CHIPS ─────────────────────────────────────────────────────────────────
+  document.querySelectorAll('.chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    });
+  });
+
+  // ── SIDEBAR TOGGLE ────────────────────────────────────────────────────────
+  const sidebar = document.getElementById('sidebar');
+  const mainContent = document.getElementById('mainContent');
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('full');
+  });
+
+  // ── OPEN VIDEO ────────────────────────────────────────────────────────────
+  let currentVideo = null;
+  let liked = false;
+  let subscribed = false;
+  let descExpanded = false;
+
+  function openVideo(id) {
+    const v = VIDEOS.find(x => x.id === id);
+    if (!v) return;
+    currentVideo = v;
+    liked = false;
+    subscribed = false;
+    descExpanded = false;
+
+    const ch = CHANNELS[v.channel];
+
+    // switch pages
+    document.getElementById('home-page').classList.add('hidden');
+    document.getElementById('player-page').classList.add('open');
+    window.scrollTo(0,0);
+
+    // thumb
+    document.getElementById('playerThumb').src = v.thumb;
+    document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
+
+    // info
+    document.getElementById('playerTitle').textContent = v.title;
+    document.getElementById('playerViews').textContent = v.views + ' • ' + v.ago;
+    document.getElementById('likeCount').textContent = formatNum(v.likes);
+
+    // channel
+    const av = document.getElementById('playerAvatar');
+    av.style.background = ch.color;
+    av.style.color = ch.color === '#f9ca24' ? '#000' : '#fff';
+    av.style.width = '40px'; av.style.height = '40px';
+    av.style.borderRadius = '50%'; av.style.display = 'flex';
+    av.style.alignItems = 'center'; av.style.justifyContent = 'center';
+    av.style.fontWeight = '700'; av.style.fontSize = '16px';
+    av.textContent = ch.name[0];
+    document.getElementById('playerChannel').textContent = ch.name;
+    document.getElementById('playerSubs').textContent = ch.subs;
+
+    // subscribe btn
+    const subBtn = document.getElementById('subscribeBtn');
+    subBtn.className = 'subscribe-btn';
+    subBtn.textContent = 'Subscribe';
+
+    // description
+    document.getElementById('descText').textContent =
+      `This is a great video about "${v.title}". In this video we explore everything you need to know about this topic in a comprehensive and beginner-friendly way. Make sure to like and subscribe for more content like this every week. Let us know in the comments what you think!\n\n📌 Chapters:\n00:00 - Intro\n02:30 - Overview\n08:00 - Deep dive\n${v.duration.split(':')[0]}:00 - Conclusion\n\n#${ch.name.replace(/\s/g,'')} #ViewTube`;
+    const descBox = document.getElementById('descBox');
+    descBox.className = 'description-box collapsed';
+    descExpanded = false;
+
+    // comments
+    document.getElementById('commentsHeader').textContent = `${formatNum(v.comments.length * 84 + 120)} Comments`;
+    renderComments();
+
+    // related
+    renderRelated(id);
+  }
+
+  function formatNum(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n/1000).toFixed(0) + 'K';
+    return n.toString();
+  }
+
+  function renderComments() {
+    const list = document.getElementById('commentsList');
+    list.innerHTML = COMMENTS_DATA.map(c => `
+      <div class="comment">
+        <div class="comment-avatar" style="background:${COLORS[c.author.length%COLORS.length]};color:${COLORS[c.author.length%COLORS.length]==='#f9ca24'?'#000':'#fff'}">${c.author[0]}</div>
+        <div class="comment-body">
+          <div class="comment-author">${c.author}<span>${c.ago}</span></div>
+          <div class="comment-text">${c.text}</div>
+          <div class="comment-actions">
+            <button class="comment-action-btn"><i class="fas fa-thumbs-up"></i> ${c.likes}</button>
+            <button class="comment-action-btn"><i class="fas fa-thumbs-down"></i></button>
+            <button class="comment-action-btn">Reply</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderRelated(currentId) {
+    const others = VIDEOS.filter(v => v.id !== currentId);
+    document.getElementById('relatedList').innerHTML = `
+      <div style="font-size:16px;font-weight:500;margin-bottom:16px">Up next</div>
+      ${others.map(v => {
+        const ch = CHANNELS[v.channel];
+        return `
+          <div class="related-video" onclick="openVideo(${v.id})">
+            <div class="related-thumb">
+              <img src="${v.thumb.replace('/640/360','/336/189')}" alt="${v.title}" loading="lazy"/>
+              <span class="related-duration">${v.duration}</span>
+            </div>
+            <div class="related-info">
+              <div class="related-title">${v.title}</div>
+              <div class="related-channel">${ch.name}</div>
+              <div class="related-stats">${v.views} • ${v.ago}</div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    `;
+  }
+
+  // like btn
+  document.getElementById('likeBtn').addEventListener('click', function() {
+    liked = !liked;
+    const v = currentVideo;
+    if (!v) return;
+    const delta = liked ? 1 : -1;
+    v.likes += delta;
+    document.getElementById('likeCount').textContent = formatNum(v.likes);
+    this.style.color = liked ? var_red() : '';
+    this.querySelector('i').style.color = liked ? '#3ea6ff' : '';
+  });
+
+  function var_red() { return '#3ea6ff'; }
+
+  // subscribe btn
+  document.getElementById('subscribeBtn').addEventListener('click', function() {
+    subscribed = !subscribed;
+    this.textContent = subscribed ? 'Subscribed' : 'Subscribe';
+    this.className = subscribed ? 'subscribe-btn subscribed' : 'subscribe-btn';
+  });
+
+  // description expand
+  document.getElementById('descBox').addEventListener('click', function() {
+    descExpanded = !descExpanded;
+    this.className = descExpanded ? 'description-box' : 'description-box collapsed';
+  });
+
+  // play btn (cosmetic)
+  document.getElementById('fakePlayer').addEventListener('click', function() {
+    const btn = document.getElementById('playBtn');
+    const isPlaying = btn.innerHTML.includes('pause');
+    btn.innerHTML = isPlaying ? '<i class="fas fa-play"></i>' : '<i class="fas fa-pause"></i>';
+  });
+
+  // comment input submit
+  document.getElementById('commentInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && this.value.trim()) {
+      const newComment = {
+        author: 'You',
+        ago: 'Just now',
+        text: this.value.trim(),
+        likes: 0,
+      };
+      COMMENTS_DATA.unshift(newComment);
+      renderComments();
+      this.value = '';
+      const v = currentVideo;
+      if (v) document.getElementById('commentsHeader').textContent = `${formatNum(v.comments.length * 84 + 120 + COMMENTS_DATA.length - 5)} Comments`;
+    }
+  });
+
+  // back btn
+  document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('home-page').classList.remove('hidden');
+    document.getElementById('player-page').classList.remove('open');
+    window.scrollTo(0,0);
+  });
+
+  // logo link
+  document.getElementById('logoLink').addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById('home-page').classList.remove('hidden');
+    document.getElementById('player-page').classList.remove('open');
+    window.scrollTo(0,0);
+  });
+
+  // search
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key==='Enter') doSearch(); });
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (!q) { renderHome(VIDEOS); return; }
+    const filtered = VIDEOS.filter(v => v.title.toLowerCase().includes(q) || CHANNELS[v.channel].name.toLowerCase().includes(q));
+    renderHome(filtered.length ? filtered : VIDEOS);
+    document.getElementById('home-page').classList.remove('hidden');
+    document.getElementById('player-page').classList.remove('open');
+    window.scrollTo(0,0);
+  }
+
+  // sidebar nav items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById('home-page').classList.remove('hidden');
+      document.getElementById('player-page').classList.remove('open');
+      window.scrollTo(0,0);
+    });
+  });
+</script>
+</body>
+</html>
